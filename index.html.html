@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MPS.br — Assistente Liberty Health</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+  :root {
+    --bg:#0D0E11;--s1:#13141A;--s2:#1A1B23;--s3:#22232E;--border:#2E2F3E;
+    --purple:#8B7EF8;--pbg:#1E1B3A;--blue:#5BA4F5;--green:#3DD68C;--gbg:#0D2A1D;
+    --orange:#F5A623;--obg:#2A1C08;--red:#F07070;--rbg:#2A0F0F;
+    --t1:#ECEAF5;--t2:#9896AA;--t3:#5A5868;
+    --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;--r:6px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:13px;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+  .topbar{height:48px;background:var(--s1);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:12px;flex-shrink:0;}
+  .logo{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--purple);letter-spacing:.06em;}
+  .sep{color:var(--border);margin:0 4px;}
+  .ttitle{font-size:13px;font-weight:500;}
+  .tright{margin-left:auto;display:flex;gap:8px;}
+  .badge{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:3px;}
+  .bp{background:var(--pbg);color:var(--purple);}
+  .bg2{background:var(--gbg);color:var(--green);}
+  .body{display:flex;flex:1;overflow:hidden;}
+  .sidebar{width:195px;background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;}
+  .sb-top{padding:10px 10px 6px;}
+  .sb-search{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:6px 9px;color:var(--t1);font-family:var(--sans);font-size:12px;outline:none;}
+  .sb-search::placeholder{color:var(--t3);}
+  .sb-grp{padding:10px 12px 2px;font-family:var(--mono);font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.1em;}
+  .sb-list{overflow-y:auto;flex:1;}
+  .ab-item{padding:7px 12px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;border-left:2px solid transparent;transition:all .1s;}
+  .ab-item:hover{background:var(--s2);}
+  .ab-item.active{background:var(--s2);border-left-color:var(--purple);}
+  .ab-name{font-size:12px;font-weight:500;}
+  .ab-item.active .ab-name{color:var(--purple);}
+  .ab-st{font-family:var(--mono);font-size:10px;}
+  .main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+  .stabs{height:40px;background:var(--s1);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 14px;gap:3px;flex-shrink:0;}
+  .stab{padding:5px 11px;font-size:12px;color:var(--t2);cursor:pointer;border-radius:var(--r);transition:all .1s;}
+  .stab:hover{background:var(--s2);color:var(--t1);}
+  .stab.active{background:var(--pbg);color:var(--purple);}
+  .split{display:flex;flex:1;overflow:hidden;}
+  .pleft{width:310px;border-right:1px solid var(--border);overflow-y:auto;background:var(--s1);flex-shrink:0;}
+  .ph{padding:11px 13px 8px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--s1);z-index:1;}
+  .ph-title{font-size:12px;font-weight:600;margin-bottom:6px;}
+  .stats{display:flex;gap:6px;}
+  .stat{flex:1;background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:5px 7px;text-align:center;}
+  .sv{font-family:var(--mono);font-size:13px;font-weight:500;}
+  .sl{font-size:10px;color:var(--t3);margin-top:1px;}
+  .rc{border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;}
+  .rc:hover{background:var(--s2);}
+  .rch{padding:9px 13px;display:flex;align-items:center;gap:7px;}
+  .rtag{font-family:var(--mono);font-size:10px;padding:2px 5px;border-radius:3px;flex-shrink:0;}
+  .rtp{background:var(--pbg);color:var(--purple);}
+  .rtg{background:var(--gbg);color:var(--green);}
+  .rto{background:var(--obg);color:var(--orange);}
+  .rlbl{font-size:12px;font-weight:500;flex:1;line-height:1.4;}
+  .rdot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+  .dok{background:var(--green);}
+  .dpar{background:var(--orange);}
+  .dem{background:var(--red);}
+  .rcb{padding:0 13px 11px;display:none;}
+  .rcb.open{display:block;}
+  .rf{margin-bottom:7px;}
+  .rfl{font-family:var(--mono);font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;}
+  .rfv{font-size:11px;color:var(--t2);line-height:1.6;background:var(--s3);padding:6px 8px;border-radius:4px;border:1px solid var(--border);}
+  .rfv.em{color:var(--t3);font-style:italic;border-style:dashed;}
+  .rcols{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:5px;}
+  .rcol{background:var(--s3);border:1px solid var(--border);border-radius:4px;padding:4px 7px;}
+  .rcn{font-family:var(--mono);font-size:9px;color:var(--t3);}
+  .rcv{font-size:11px;margin-top:1px;}
+  .rcv.fil{color:var(--green);}
+  .rcv.em{color:var(--t3);font-style:italic;}
+  .chat{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+  .msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:13px;}
+  .msg{display:flex;gap:8px;}
+  .msg.user{flex-direction:row-reverse;}
+  .av{width:25px;height:25px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;font-weight:500;flex-shrink:0;}
+  .av.ai{background:var(--pbg);color:var(--purple);}
+  .av.user{background:var(--s3);color:var(--t2);}
+  .bub{max-width:calc(100% - 75px);padding:9px 12px;border-radius:6px;font-size:13px;line-height:1.7;}
+  .msg.ai .bub{background:var(--s2);border:1px solid var(--border);border-radius:2px 6px 6px 6px;}
+  .msg.user .bub{background:var(--pbg);border:1px solid var(--purple);border-radius:6px 2px 6px 6px;}
+  .bub b{color:var(--purple);}
+  .bub .ok{color:var(--green);}
+  .bub .warn{color:var(--orange);}
+  .bub .err{color:var(--red);}
+  .bub .tg{font-family:var(--mono);font-size:10px;background:var(--s3);padding:1px 5px;border-radius:3px;color:var(--blue);}
+  .chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;}
+  .chip{background:var(--s3);border:1px solid var(--border);border-radius:20px;padding:4px 10px;font-size:11px;color:var(--t2);cursor:pointer;transition:all .1s;}
+  .chip:hover{border-color:var(--purple);color:var(--purple);background:var(--pbg);}
+  .ld{display:flex;gap:4px;align-items:center;padding:2px 0;}
+  .ld span{width:5px;height:5px;background:var(--purple);border-radius:50%;animation:bl 1.2s ease-in-out infinite;opacity:.3;}
+  .ld span:nth-child(2){animation-delay:.2s;}
+  .ld span:nth-child(3){animation-delay:.4s;}
+  @keyframes bl{0%,100%{opacity:.3;transform:scale(1)}50%{opacity:1;transform:scale(1.4)}}
+  .iw{border-top:1px solid var(--border);padding:9px 13px;background:var(--s1);display:flex;gap:7px;align-items:flex-end;}
+  .inp{flex:1;background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:8px 11px;color:var(--t1);font-family:var(--sans);font-size:13px;resize:none;outline:none;min-height:36px;max-height:100px;line-height:1.5;transition:border-color .15s;}
+  .inp:focus{border-color:var(--purple);}
+  .inp::placeholder{color:var(--t3);}
+  .snd{background:var(--purple);border:none;border-radius:var(--r);width:34px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:opacity .15s;flex-shrink:0;}
+  .snd:hover{opacity:.85;}
+  .snd:disabled{opacity:.35;cursor:not-allowed;}
+  .snd svg{width:14px;height:14px;fill:white;}
+  ::-webkit-scrollbar{width:4px;}
+  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <span class="logo">MPS.br</span><span class="sep">/</span>
+  <span class="ttitle">Assistente de Evidências — Liberty Health</span>
+  <div class="tright">
+    <span class="badge bp">Nível F</span>
+    <span class="badge bg2">DSDI</span>
+  </div>
+</div>
+<div class="body">
+  <div class="sidebar">
+    <div class="sb-top"><input class="sb-search" placeholder="Buscar..." oninput="filtrar(this.value)"></div>
+    <div class="sb-list" id="sbList">
+      <div class="sb-grp">Projeto</div>
+      <div class="ab-item active" onclick="selAba('GPR',this)"><span class="ab-name">GPR</span><span class="ab-st" style="color:var(--orange)">Parcial</span></div>
+      <div class="ab-item" onclick="selAba('REQ',this)"><span class="ab-name">REQ</span><span class="ab-st" style="color:var(--orange)">Parcial</span></div>
+      <div class="ab-item" onclick="selAba('PCP',this)"><span class="ab-name">PCP</span><span class="ab-st" style="color:var(--orange)">Parcial</span></div>
+      <div class="ab-item" onclick="selAba('ITP',this)"><span class="ab-name">ITP</span><span class="ab-st" style="color:var(--orange)">Parcial</span></div>
+      <div class="ab-item" onclick="selAba('VV',this)"><span class="ab-name">VV</span><span class="ab-st" style="color:var(--orange)">Parcial</span></div>
+      <div class="ab-item" onclick="selAba('CP_Projeto',this)"><span class="ab-name">CP_Projeto</span><span class="ab-st" style="color:var(--orange)">Parcial</span></div>
+      <div class="sb-grp">Organizacional</div>
+      <div class="ab-item" onclick="selAba('GCO',this)"><span class="ab-name">GCO</span><span class="ab-st" style="color:var(--orange)">Parcial</span></div>
+      <div class="ab-item" onclick="selAba('MED',this)"><span class="ab-name">MED</span><span class="ab-st" style="color:var(--orange)">Parcial</span></div>
+      <div class="ab-item" onclick="selAba('GDE',this)"><span class="ab-name">GDE</span><span class="ab-st" style="color:var(--orange)">Parcial</span></div>
+      <div class="ab-item" onclick="selAba('CAP',this)"><span class="ab-name">CAP</span><span class="ab-st" style="color:var(--orange)">Parcial</span></div>
+      <div class="ab-item" onclick="selAba('GPC',this)"><span class="ab-name">GPC</span><span class="ab-st" style="color:var(--orange)">Parcial</span></div>
+      <div class="ab-item" onclick="selAba('OSW',this)"><span class="ab-name">OSW</span><span class="ab-st" style="color:var(--orange)">Parcial</span></div>
+      <div class="ab-item" onclick="selAba('CP_Org',this)"><span class="ab-name">CP_Org.</span><span class="ab-st" style="color:var(--orange)">Parcial</span></div>
+    </div>
+  </div>
+  <div class="main">
+    <div class="stabs">
+      <div class="stab active" onclick="setTab('resumo',this)">Resumo</div>
+      <div class="stab" onclick="setTab('analisar',this)">Analisar</div>
+      <div class="stab" onclick="setTab('gaps',this)">Gaps</div>
+      <div class="stab" onclick="setTab('auditor',this)">Simular auditor</div>
+    </div>
+    <div class="split">
+      <div class="pleft">
+        <div class="ph">
+          <div class="ph-title" id="phTitle">GPR — Gerência de Projetos</div>
+          <div class="stats">
+            <div class="stat"><div class="sv" style="color:var(--green)" id="stTotal">14</div><div class="sl">Resultados</div></div>
+            <div class="stat"><div class="sv" style="color:var(--green)" id="stFonte">14</div><div class="sl">Fonte OK</div></div>
+            <div class="stat"><div class="sv" style="color:var(--orange)" id="stProj">1</div><div class="sl">Proj. Preench.</div></div>
+          </div>
+        </div>
+        <div id="rcContainer"></div>
+      </div>
+      <div class="chat">
+        <div class="msgs" id="msgs"></div>
+        <div class="iw">
+          <textarea class="inp" id="inp" placeholder="Pergunte sobre processos, evidências ou gaps..." rows="1" onkeydown="hk(event)" oninput="ar(this)"></textarea>
+          <button class="snd" id="sndBtn" onclick="enviar()"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const D={
+  GPR:{n:'GPR — Gerência de Projetos',t:'p',r:[
+    {id:'GPR 1',l:'Escopo do trabalho',re:'O escopo do trabalho para o projeto é estabelecido, mantido e comunicado às partes interessadas.',ev:'Documento de Visão registrado no Jira/Confluence, contendo objetivo, stakeholders, premissas e limites do projeto.',fo:'Documento de Visão do Negócio registrado no Confluence, complementado pelo backlog priorizado no Jira.',pj:['x','x','x','x']},
+    {id:'GPR 2',l:'Processo de execução',re:'O processo a ser utilizado para a execução do projeto é definido.',ev:'O ciclo de vida do projeto é definido no modelo de Agile Delivery adotado pela Liberty.',fo:'Ciclo de Desenvolvimento Liberty formalizado no Confluence, dentro do Modelo Operacional.',pj:['','','','']},
+    {id:'GPR 3',l:'Estimativas de dimensão',re:'Estimativas de dimensão da solução são estabelecidas e mantidas.',ev:'As estimativas de dimensão das demandas são realizadas por meio de Story Points no Jira.',fo:'Estimativas em Story Points registradas no Jira para cada história, revisadas durante os refinamentos.',pj:['','','','']},
+    {id:'GPR 4',l:'Estimativas de esforço',re:'Estimativas de esforço, duração e custo são estabelecidas.',ev:'As estimativas de esforço, duração e custo do projeto são definidas a partir da capacidade do time.',fo:'Estimativas de esforço e capacidade documentadas na Ata de Sprint Planning no Confluence.',pj:['','','','']},
+    {id:'GPR 5',l:'Orçamento e cronograma',re:'O orçamento e o cronograma do projeto são estabelecidos e mantidos.',ev:'O orçamento e cronograma são definidos por sprint e acompanhados no Jira.',fo:'Orçamento registrado na Ata de Sprint Planning. Cronograma acompanhado no board do Jira e Página de Sprint.',pj:['','','','']},
+    {id:'GPR 6',l:'Recursos humanos',re:'Os recursos humanos para o projeto são planejados considerando as competências necessárias.',ev:'Equipe alocada conforme escopo e necessidades do projeto, com papéis definidos.',fo:'Alocação de recursos planejada na Ata de Sprint Planning no Confluence, com papéis e responsáveis definidos.',pj:['','','','']},
+    {id:'GPR 7',l:'Recursos materiais',re:'Os recursos materiais e o ambiente de trabalho são identificados e disponibilizados.',ev:'Ferramentas e ambiente de trabalho definidos para execução do projeto.',fo:'Página de Setup do Projeto no Confluence descrevendo ferramentas, acessos e ambiente de trabalho.',pj:['','','','']},
+    {id:'GPR 8',l:'Transição para operação',re:'A estratégia de transição para operação e suporte do produto é estabelecida.',ev:'Repasse formal das atividades para a equipe de sustentação após cada entrega.',fo:'Plano de Transição para Sustentação no Confluence. Inclui pacote Git, Release Notes, registro Jira, garantia e ata de repasse.',pj:['','','','']},
+    {id:'GPR 9',l:'Partes interessadas',re:'O envolvimento das partes interessadas no projeto é planejado.',ev:'Stakeholders identificados e com envolvimento planejado por checkpoints.',fo:'Matriz de Stakeholders no Confluence com partes interessadas identificadas e checkpoints de envolvimento.',pj:['','','','']},
+    {id:'GPR 10',l:'Riscos e oportunidades',re:'Os riscos ou oportunidades do projeto são identificados e tratados.',ev:'Riscos e oportunidades identificados e documentados no Jira e Confluence.',fo:'Registro de Riscos no Jira (issues tipo Risco) e Registro de Riscos DSDI no Confluence com ID, categoria, probabilidade, impacto, mitigação e status.',pj:['','','','']},
+    {id:'GPR 11',l:'Viabilidade do projeto',re:'A viabilidade do projeto é avaliada considerando as restrições estabelecidas.',ev:'Avaliação da viabilidade realizada considerando estimativas, capacidade do time e restrições.',fo:'Avaliação de viabilidade documentada na Ata de Sprint Planning no Confluence, com análise de capacidade e restrições.',pj:['','','','']},
+    {id:'GPR 12',l:'Plano geral do projeto',re:'Um plano geral para a execução do projeto é estabelecido e mantido.',ev:'Plano geral do projeto definido e mantido no Jira, integrando escopo, cronograma, backlog e riscos.',fo:'Plano do Projeto consolidado no Confluence integrando escopo, cronograma por sprint, backlog no Jira e riscos.',pj:['','','','']},
+    {id:'GPR 13',l:'Revisão com interessados',re:'O Plano do Projeto é revisado com todos os interessados e o comprometimento é obtido.',ev:'Kickoff realizado com participação da equipe do projeto e stakeholders.',fo:'Ata de Kickoff no Confluence com participantes, revisão do plano e comprometimento registrado.',pj:['','','','']},
+    {id:'GPR 14',l:'Monitoramento contínuo',re:'O escopo, tarefas, estimativas, orçamento e cronograma são monitorados e ajustados.',ev:'O monitoramento do projeto ocorre de forma contínua no Jira.',fo:'Acompanhamento no board do Jira e nas Páginas de Sprint no Confluence com indicadores de velocidade, lead time, bugs e percentual concluído.',pj:['','','','']},
+  ]},
+  REQ:{n:'REQ — Engenharia de Requisitos',t:'p',r:[
+    {id:'REQ 1',l:'Levantamento de requisitos',re:'As necessidades, expectativas e restrições das partes interessadas são identificadas.',ev:'Os requisitos são levantados junto às partes interessadas, registrados no backlog do Jira.',fo:'Requisitos levantados com as partes interessadas, registrados como histórias no Jira e validados nas Atas de Refinamento no Confluence.',pj:['','','','']},
+    {id:'REQ 2',l:'Especificação e priorização',re:'Os requisitos são especificados, priorizados e mantidos atualizados.',ev:'Os requisitos são detalhados como histórias no Jira, priorizados pelo Product Owner.',fo:'Histórias detalhadas no Jira com critério de aceite definido, priorizadas pelo PO e revisadas nos refinamentos registrados no Confluence.',pj:['','','','']},
+    {id:'REQ 3',l:'Comprometimento da equipe',re:'O comprometimento da equipe técnica com a implementação dos requisitos é estabelecido.',ev:'A equipe técnica assume compromisso com os requisitos selecionados durante a planning.',fo:'Compromisso do time registrado na Ata de Sprint Planning no Confluence, após validação técnica e confirmação de viabilidade.',pj:['','','','']},
+    {id:'REQ 4',l:'Rastreabilidade',re:'A rastreabilidade bidirecional entre requisitos, atividades e produtos de trabalho é estabelecida.',ev:'Os requisitos são vinculados às atividades técnicas no Jira por meio de épicos, histórias e subtasks.',fo:'Rastreabilidade mantida no Jira por meio da hierarquia épico, história e subtask, garantindo vínculo entre requisito e entrega.',pj:['','','','']},
+    {id:'REQ 5',l:'Revisão contínua',re:'Os planos, atividades e produtos de trabalho relacionados aos requisitos são revisados.',ev:'Requisitos e entregas são revisados continuamente em refinamentos, planning, QA e retrospectiva.',fo:'Revisões de requisitos registradas nas Atas de Refinamento e Retrospectivas no Confluence, com histórico de atualizações no Jira.',pj:['','','','']},
+  ]},
+  PCP:{n:'PCP — Projeto e Construção',t:'p',r:[
+    {id:'PCP 1',l:'Design do produto',re:'Um projeto (design) para o produto, que atenda aos requisitos, é desenvolvido.',ev:'A solução técnica é definida durante refinamentos técnicos.',fo:'Solução técnica definida nos refinamentos e registrada em ADR no Confluence, vinculado ao card correspondente no Jira.',pj:['','','','']},
+    {id:'PCP 2',l:'Avaliação do design',re:'O projeto (design) é avaliado e os problemas identificados são tratados.',ev:'A solução técnica é revisada em refinamentos técnicos e code reviews.',fo:'Avaliação do design realizada por meio de code reviews nos Pull Requests do repositório Git e revisões técnicas nos ADRs.',pj:['','','','']},
+    {id:'PCP 3',l:'Implementação',re:'O produto é implementado de acordo com o projeto (design).',ev:'A implementação segue a solução técnica definida no design e é validada por code review.',fo:'Implementação acompanhada pelo histórico de commits e PRs aprovados no repositório Git, com cards movidos para Done após validação.',pj:['','','','']},
+  ]},
+  ITP:{n:'ITP — Integração do Produto',t:'p',r:[
+    {id:'ITP 1',l:'Estratégia de integração',re:'Uma estratégia para integração dos componentes do produto é definida.',ev:'A integração dos componentes ocorre por meio de versionamento em repositório e pipeline CI/CD.',fo:'Estratégia de integração descrita no Modelo Operacional no Confluence, com branching strategy, critérios de aprovação de PR e pipeline CI/CD definidos.',pj:['','','','']},
+    {id:'ITP 2',l:'Ambiente de integração',re:'Um ambiente para integração dos componentes do produto é disponibilizado.',ev:'A integração ocorre em ambiente controlado DEV/HML.',fo:'Ambientes DEV, HML e PRD controlados, com builds validados via pipeline registrado no repositório Git.',pj:['','','','']},
+    {id:'ITP 3',l:'Avaliação de componentes',re:'Cada componente do produto é avaliado para confirmar que atende aos requisitos.',ev:'Antes da integração, cada item implementado passa por code review, testes e validação.',fo:'Avaliação de componentes realizada por meio de code reviews nos PRs do Git e validação dos critérios de aceite no Jira antes do merge.',pj:['','','','']},
+    {id:'ITP 4',l:'Integração executada',re:'Os componentes do produto são integrados utilizando a estratégia definida.',ev:'A integração ocorre por meio de pull requests, validação em pipeline e deploy em ambientes.',fo:'Integração executada por meio de Pull Requests aprovados e deploys registrados no repositório Git, com Release Notes publicadas no Confluence.',pj:['','','','']},
+    {id:'ITP 5',l:'Produto integrado testado',re:'O produto integrado é testado para assegurar que atende aos requisitos.',ev:'Após a integração, o produto é validado em ambiente de homologação.',fo:'Produto integrado validado em homologação com aceite registrado no Jira e itens entregues nas Release Notes no Confluence.',pj:['','','','']},
+    {id:'ITP 6',l:'Entrega do produto',re:'O produto e material de apoio são preparados e entregues.',ev:'Produto liberado com registro de versão e Release Notes.',fo:'Produto liberado com Release Notes publicadas no Confluence contendo versão, data, ambiente e itens entregues, com Fix Version registrada no Jira.',pj:['','','','']},
+  ]},
+  VV:{n:'VV — Verificação e Validação',t:'p',r:[
+    {id:'VV 1',l:'Seleção de produtos',re:'Produtos de trabalho a serem verificados e validados são identificados.',ev:'Requisitos, código e produto integrado são selecionados para VV.',fo:'Produtos de trabalho selecionados identificados no fluxo do Jira, cobertos por refinamento, code review e homologação.',pj:['','','','']},
+    {id:'VV 2',l:'Procedimentos de revisão',re:'Procedimentos e material de apoio para verificação e validação são definidos.',ev:'A revisão por pares é realizada por meio de pull requests com critérios definidos.',fo:'Revisão por pares realizada por meio de Pull Requests no repositório Git, com critérios de aprovação definidos e histórico de revisões mantido.',pj:['','','','']},
+    {id:'VV 3',l:'Métodos e ambientes',re:'Métodos, procedimentos e ambientes são definidos, mantidos e usados.',ev:'VV seguem métodos definidos com revisão técnica, testes e aceite.',fo:'Métodos de VV descritos no Modelo Operacional no Confluence, com testes em ambiente controlado e resultados registrados no Jira.',pj:['','','','']},
+    {id:'VV 4',l:'Execução de VV',re:'Atividades de verificação e validação são realizadas e os resultados registrados.',ev:'VV executadas com registro e tratamento dos problemas encontrados.',fo:'Atividades de VV registradas no Jira com bugs vinculados ao card de origem, aceite de homologação preenchido e problemas tratados na Retrospectiva.',pj:['','','','']},
+  ]},
+  CP_Projeto:{n:'CP_Projeto — Capacidade de Processos',t:'c',r:[
+    {id:'CP-F (i)',l:'Processo produz resultados',re:'O processo produz os resultados definidos.',ev:'',fo:'Cards concluídos por sprint com evidências registradas no Jira, complementados pelas Páginas de Sprint no Confluence.',pj:['','','','']},
+    {id:'CP-F (ii)',l:'Execução planejada e monitorada',re:'A execução do processo é planejada e monitorada.',ev:'',fo:'Execução planejada e monitorada pela Ata de Sprint Planning e Página de Sprint no Confluence, com board do Jira atualizado.',pj:['','','','']},
+    {id:'CP-F (iii)',l:'Pessoas preparadas',re:'As pessoas estão preparadas para executar suas responsabilidades no processo.',ev:'',fo:'Preparação do time registrada na Matriz de Capacitação no Confluence, com participação no Workshop MPS.br documentada.',pj:['','','','']},
+    {id:'CP-F (iv)',l:'Verificação objetiva',re:'A verificação objetiva de que o processo é seguido é realizada.',ev:'',fo:'Verificação de aderência realizada pelo Agile Delivery por meio do Checklist de Evidências por Sprint e auditorias internas no Confluence.',pj:['','','','']},
+    {id:'CP-F (v)',l:'Produtos avaliados',re:'Os produtos de trabalho selecionados são avaliados objetivamente.',ev:'',fo:'Avaliação objetiva dos produtos de trabalho registrada nas auditorias internas no Confluence, com não conformidades e ações corretivas documentadas.',pj:['','','','']},
+  ]},
+  GCO:{n:'GCO — Gerência de Configuração',t:'o',r:[
+    {id:'GCO 1',l:'Itens de configuração',re:'Itens de configuração são identificados e seus níveis de controle estabelecidos.',ev:'Itens de configuração identificados com identificação única, nível de controle e responsável.',fo:'Itens de configuração identificados no Modelo Operacional no Confluence, incluindo repositórios de código, documentos de processo e versões de produto.',pj:['']},
+    {id:'GCO 2',l:'Sistema de gerência',re:'Um sistema para gerência de configuração e controle de mudanças é estabelecido.',ev:'Sistema de gerência de configuração estabelecido com repositório Git.',fo:'Sistema de controle de configuração mantido no repositório Git com branching strategy definida, complementado pelos campos Fix Version e Components no Jira.',pj:['']},
+    {id:'GCO 3',l:'Baselines',re:'Baselines são estabelecidas considerando itens internos e externos ao projeto.',ev:'Baselines estabelecidas a cada release por meio de tags de versão no repositório Git.',fo:'Baselines estabelecidas por meio de tags de versão no repositório Git após cada release, com registro nas Release Notes no Confluence.',pj:['']},
+    {id:'GCO 4',l:'Registros de modificações',re:'Registros de itens de configuração e de modificações são mantidos.',ev:'Registros de itens de configuração e suas modificações mantidos no repositório Git.',fo:'Histórico de modificações mantido nos commits e Pull Requests do repositório Git, com alterações de cards registradas no histórico do Jira.',pj:['']},
+    {id:'GCO 5',l:'Auditorias de configuração',re:'Auditorias de configuração são executadas para avaliar a integridade das baselines.',ev:'Auditorias de configuração realizadas periodicamente pela auditora interna Rita Magalhães.',fo:'Auditorias de configuração registradas na pasta Auditoria no Confluence, com verificação periódica da aderência aos itens de configuração definidos.',pj:['']},
+  ]},
+  MED:{n:'MED — Medição',t:'o',r:[
+    {id:'MED 1',l:'Objetivos de medição',re:'Objetivos organizacionais de medição e de desempenho dos processos são definidos.',ev:'Objetivos organizacionais de medição derivados dos objetivos de negócio.',fo:'Objetivos de medição definidos no Modelo Operacional no Confluence, alinhados aos objetivos da DSDI e registrados na Planilha de Indicadores MPS.br Nível F.',pj:['']},
+    {id:'MED 2',l:'Medidas identificadas',re:'Medidas são identificadas a partir dos objetivos organizacionais.',ev:'Medidas identificadas a partir dos objetivos de medição e dos processos MPS.br.',fo:'Definições operacionais das medidas documentadas na Planilha de Indicadores MPS.br Nível F e na seção Indicadores do Confluence.',pj:['']},
+    {id:'MED 3',l:'Coleta de medidas',re:'Medidas são coletadas e armazenadas de acordo com as definições operacionais.',ev:'Medidas coletadas ao final de cada sprint conforme definições operacionais.',fo:'Medidas coletadas na Página de Sprint no Confluence (velocidade, lead time, bugs, % concluído) e consolidadas na Planilha de Indicadores Nível F.',pj:['']},
+    {id:'MED 4',l:'Análise de medidas',re:'Medidas são analisadas e os resultados da análise são comunicados.',ev:'Medidas analisadas ao final de cada sprint.',fo:'Análise de indicadores realizada na Página de Sprint no Confluence, com resultados consolidados na Planilha de Indicadores MPS.br Nível F.',pj:['']},
+    {id:'MED 5',l:'Ações corretivas',re:'A partir do resultado da análise das medidas, ações corretivas são implementadas.',ev:'A partir da análise das medidas, ações corretivas são definidas e implementadas.',fo:'Ações corretivas derivadas da análise de indicadores registradas nas Retrospectivas no Confluence, com acompanhamento na sprint seguinte.',pj:['']},
+  ]},
+  GDE:{n:'GDE — Gerência de Decisões',t:'o',r:[
+    {id:'GDE 1',l:'Diretrizes de decisão',re:'Diretrizes definindo quando um processo formal de tomada de decisão deve ser aplicado são estabelecidas.',ev:'Diretrizes que estabelecem quando uma decisão crítica deve ser objeto de processo formal.',fo:'Diretrizes para tomada de decisão formal descritas no Modelo Operacional no Confluence, com uso do template ADR para decisões técnicas relevantes.',pj:['']},
+    {id:'GDE 2',l:'Problema definido',re:'O problema ou questão a ser objeto de um processo formal de tomada de decisão é definido.',ev:'Problema ou questão objeto da decisão formal definido e registrado no ADR.',fo:'Problema ou questão registrado no campo Contexto do ADR no Confluence, vinculado ao card correspondente no Jira.',pj:['']},
+    {id:'GDE 3',l:'Alternativas identificadas',re:'Alternativas de solução para o problema ou questão são identificadas.',ev:'Alternativas de solução identificadas e registradas no ADR.',fo:'Alternativas de solução documentadas no campo Alternativas Consideradas do ADR no Confluence.',pj:['']},
+    {id:'GDE 4',l:'Critérios de avaliação',re:'Critérios para avaliação das alternativas de solução são definidos.',ev:'Critérios de avaliação das alternativas definidos e registrados no ADR.',fo:'Critérios de avaliação registrados no campo Decisão do ADR no Confluence, com justificativa da alternativa escolhida.',pj:['']},
+    {id:'GDE 5',l:'Métodos de avaliação',re:'Métodos de avaliação das alternativas de solução são selecionados.',ev:'Métodos de avaliação selecionados conforme impacto e riscos envolvidos.',fo:'Impactos técnicos, operacionais e riscos avaliados documentados no campo Impactos do ADR no Confluence.',pj:['']},
+    {id:'GDE 6',l:'Decisão registrada',re:'Soluções alternativas são avaliadas usando os critérios e métodos estabelecidos.',ev:'Alternativas avaliadas com base nos critérios e métodos estabelecidos.',fo:'Decisão registrada no ADR no Confluence com alternativa escolhida, critérios utilizados e justificativa formal.',pj:['']},
+  ]},
+  CAP:{n:'CAP — Capacitação',t:'o',r:[
+    {id:'CAP 1',l:'Necessidades identificadas',re:'As necessidades de capacitação são identificadas.',ev:'Necessidades de capacitação identificadas a partir das competências necessárias.',fo:'Necessidades de capacitação identificadas na Matriz de Capacitação no Confluence, com gap registrado e solução planejada por responsável.',pj:['']},
+    {id:'CAP 2',l:'Treinamentos realizados',re:'Os treinamentos identificados como necessários são realizados e registrados.',ev:'Treinamentos identificados como necessários executados e registrados.',fo:'Treinamentos realizados registrados na Matriz de Capacitação no Confluence, com status atualizado e evidência de conclusão documentada.',pj:['']},
+  ]},
+  GPC:{n:'GPC — Gerência de Processos',t:'o',r:[
+    {id:'GPC 1',l:'Ativos de processo',re:'Os ativos de processo necessários para realizar o trabalho são identificados.',ev:'Ativos de processo necessários identificados e disponibilizados.',fo:'Ativos de processo identificados no Modelo Operacional no Confluence, incluindo templates, guias, ciclo de desenvolvimento e Guia de Uso do Jira.',pj:['']},
+    {id:'GPC 2',l:'Ativos disponibilizados',re:'Os ativos de processo identificados como necessários são desenvolvidos ou adquiridos.',ev:'Ativos de processo desenvolvidos e disponibilizados aos times.',fo:'Ativos disponibilizados na pasta Templates no Confluence: Ata de Refinamento, Planning, Retrospectiva, Release Notes, ADR, Registro de Riscos e Página de Sprint.',pj:['']},
+    {id:'GPC 3',l:'Garantia da qualidade',re:'Uma estratégia de garantia da qualidade é definida e executada.',ev:'Estratégia de garantia da qualidade definida com escopo, procedimentos e responsáveis.',fo:'Estratégia de garantia da qualidade executada por meio do Checklist de Evidências por Sprint, com não conformidades na pasta Auditoria no Confluence.',pj:['']},
+    {id:'GPC 4',l:'Oportunidades de melhoria',re:'Oportunidades de melhoria dos processos são identificadas.',ev:'Oportunidades de melhoria dos processos identificadas a cada sprint.',fo:'Oportunidades de melhoria identificadas no campo O que pode melhorar das Retrospectivas no Confluence, com registro por sprint.',pj:['']},
+    {id:'GPC 5',l:'Plano de melhorias',re:'Um plano para implementação de melhorias é definido, executado e acompanhado.',ev:'Plano de implementação de melhorias definido com ações, responsáveis e prazos.',fo:'Plano de melhorias definido nas Retrospectivas no Confluence, com ações, responsáveis e prazos registrados e acompanhados na sprint seguinte.',pj:['']},
+  ]},
+  OSW:{n:'OSW — Gerência Organizacional',t:'o',r:[
+    {id:'OSW 1',l:'Diretrizes organizacionais',re:'Diretrizes para definição e melhoria do desempenho dos processos são estabelecidas.',ev:'Diretrizes para definição e melhoria do desempenho dos processos estabelecidas pela DSDI.',fo:'Diretrizes organizacionais definidas no Modelo Operacional no Confluence e comunicadas no Workshop MPS.br, com registro de participação documentado.',pj:['']},
+    {id:'OSW 2',l:'Recursos e treinamentos',re:'Recursos e treinamento para definição, apoio, execução e melhoria dos processos são disponibilizados.',ev:'Recursos humanos, materiais e treinamentos necessários disponibilizados.',fo:'Recursos e treinamentos garantidos pela gestão registrados na Matriz de Capacitação no Confluence e no Modelo Operacional.',pj:['']},
+    {id:'OSW 3',l:'Informações de desempenho',re:'As informações necessárias para garantir à gerência visibilidade sobre os processos são disponibilizadas.',ev:'Informações sobre efetividade e desempenho dos processos identificadas e disponibilizadas.',fo:'Informações de desempenho disponibilizadas à gestão por meio da Planilha de Indicadores MPS.br Nível F e das Páginas de Sprint no Confluence.',pj:['']},
+    {id:'OSW 4',l:'Atribuição de autoridade',re:'A atribuição de autoridade e o alinhamento dos colaboradores com as diretrizes são garantidos.',ev:'Autoridade atribuída e colaboradores alinhados às diretrizes organizacionais.',fo:'Atribuição de autoridade e papéis definidos no Modelo Operacional no Confluence, com alinhamento realizado no Workshop MPS.br.',pj:['']},
+    {id:'OSW 5',l:'Riscos organizacionais',re:'Os riscos ou oportunidades organizacionais são identificados, analisados e tratados.',ev:'Riscos e oportunidades organizacionais identificados, analisados e tratados.',fo:'Riscos e oportunidades organizacionais registrados no Registro de Riscos DSDI no Confluence e nas Retrospectivas por sprint.',pj:['']},
+  ]},
+  CP_Org:{n:'CP_Org. — Capacidade Organizacional',t:'c',r:[
+    {id:'CP-F (i)',l:'Processo produz resultados — org.',re:'O processo produz os resultados definidos (por processo organizacional).',ev:'',fo:'GCO: Modelo Operacional e Páginas de Sprint. MED: Planilha Nível F. GDE: ADRs. CAP: Matriz de Capacitação. GPC: Templates no Confluence. OSW: Workshop MPS.br.',pj:['']},
+    {id:'CP-F (ii)',l:'Execução planejada — org.',re:'A execução do processo é planejada e monitorada.',ev:'',fo:'GCO: Checklist de Evidências. MED: Páginas de Sprint e Planilha. GDE: ADRs revisados. CAP: Matriz de Capacitação. GPC: Checklist. OSW: Modelo Operacional.',pj:['']},
+    {id:'CP-F (iii)',l:'Pessoas preparadas — org.',re:'As pessoas estão preparadas para executar suas responsabilidades.',ev:'',fo:'Todos os processos: Workshop MPS.br registrado no Confluence e Matriz de Capacitação com soluções planejadas e responsáveis definidos.',pj:['']},
+    {id:'CP-F (iv)',l:'Verificação objetiva — org.',re:'A verificação objetiva de que o processo é seguido é realizada.',ev:'',fo:'Auditorias internas conduzidas pela Rita Magalhães, registradas na pasta Auditoria no Confluence, verificando aderência de todos os processos organizacionais por sprint.',pj:['']},
+    {id:'CP-F (v)',l:'Produtos avaliados — org.',re:'Os produtos de trabalho selecionados são avaliados objetivamente.',ev:'',fo:'Não conformidades e ações corretivas registradas nas auditorias internas no Confluence, cobrindo GCO, MED, GDE, CAP, GPC e OSW.',pj:['']},
+  ]},
+};
+
+let aba='GPR',tab='resumo',hist=[],loading=false;
+
+function getSys(){
+  const a=D[aba];
+  const res=a.r.map(r=>`${r.id}: ${r.l} | Fonte: ${r.fo.substring(0,100)}`).join('\n');
+  return `Você é especialista em MPS.br SW Nível F, assistente da Liberty Health (DSDI).
+
+CONTEXTO:
+- 4 times modelo Scrum: SGHx 1 (Proj 1), SGHx 2 (Proj 2), eSaúde (Proj 3), Faturamento (Proj 4)
+- Ferramentas: Jira, Confluence, Git, CI/CD
+- Templates prontos: Ata de Refinamento, Planning, Retrospectiva, Release Notes, ADR, Registro de Riscos, Página de Sprint, Matriz de Capacitação
+- Agile Delivery: Rafael Silva | Auditora interna: Rita Magalhães
+- 3 sprints para geração de evidências antes da avaliação com auditor externo
+- Colunas Proj 1–4 e ORG: aguardando preenchimento conforme sprints avançam
+- T/L/P/N/NA: preenchido APENAS pelo auditor externo
+
+ABA: ${aba} — ${a.n} | TAB: ${tab}
+
+RESULTADOS:
+${res}
+
+INSTRUÇÕES:
+- Direto, objetivo, português brasileiro natural
+- Analisar: o que está bem, o que pode faltar, o que o auditor vai perguntar
+- Gaps: o que falta gerar como evidência e em qual time
+- Simular auditor: perguntas diretas e verificáveis como o auditor faria
+- Resumo: visão geral clara do status
+- Nunca usar travessão como separador principal`;
+}
+
+function render(){
+  const a=D[aba];
+  document.getElementById('phTitle').textContent=a.n;
+  const tot=a.r.length;
+  const fok=a.r.filter(r=>r.fo).length;
+  const pok=a.r.filter(r=>r.pj.some(p=>p&&p!=='')).length;
+  document.getElementById('stTotal').textContent=tot;
+  document.getElementById('stFonte').textContent=fok;
+  document.getElementById('stProj').textContent=pok;
+  const tc={p:'rtp',o:'rtg',c:'rto'}[a.t]||'rtp';
+  document.getElementById('rcContainer').innerHTML=a.r.map((r,i)=>{
+    const sf=r.fo?'dok':'dem';
+    const sp=r.pj.some(p=>p&&p!=='')?'dok':'dem';
+    const s=sf==='dok'&&sp==='dok'?'dok':sf==='dok'?'dpar':'dem';
+    const isO=a.t==='o';
+    const cols=isO
+      ?`<div class="rcol"><div class="rcn">ORG</div><div class="rcv ${r.pj[0]?'fil':'em'}">${r.pj[0]||'Aguardando'}</div></div>`
+      :r.pj.map((p,j)=>`<div class="rcol"><div class="rcn">Proj ${j+1}</div><div class="rcv ${p?'fil':'em'}">${p||'Aguardando'}</div></div>`).join('');
+    return `<div class="rc"><div class="rch" onclick="tog(${i})">
+      <span class="rtag ${tc}">${r.id}</span>
+      <span class="rlbl">${r.l}</span>
+      <span class="rdot ${s}"></span>
+    </div><div class="rcb" id="rcb${i}">
+      <div class="rf"><div class="rfl">Resultado esperado</div><div class="rfv">${r.re}</div></div>
+      ${r.ev?`<div class="rf"><div class="rfl">Evidência Liberty</div><div class="rfv">${r.ev}</div></div>`:''}
+      <div class="rf"><div class="rfl">Fonte da evidência</div><div class="rfv ${r.fo?'':'em'}">${r.fo||'Não preenchido'}</div></div>
+      <div class="rf"><div class="rfl">Status por projeto</div><div class="rcols">${cols}</div></div>
+    </div></div>`;
+  }).join('');
+}
+
+function tog(i){document.getElementById('rcb'+i).classList.toggle('open');}
+
+function selAba(a,el){
+  aba=a;
+  document.querySelectorAll('.ab-item').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active');
+  render();
+  addMsg('ai',`Aba <b>${a}</b> selecionada — ${D[a].n}. O que quer fazer?<div class="chips"><span class="chip" onclick="ec(this)">Resumo do ${a}</span><span class="chip" onclick="ec(this)">Gaps do ${a}</span><span class="chip" onclick="ec(this)">O que o auditor vai perguntar sobre ${a}?</span><span class="chip" onclick="ec(this)">Como preparar o time para ${a}?</span></div>`);
+}
+
+function filtrar(v){document.querySelectorAll('.ab-item').forEach(el=>{const n=el.querySelector('.ab-name')?.textContent?.toLowerCase()||'';el.style.display=n.includes(v.toLowerCase())?'':'none';});}
+
+function setTab(t,el){
+  tab=t;
+  document.querySelectorAll('.stab').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active');
+  const msgs={resumo:`Modo <b>Resumo</b> ativo.`,analisar:`Modo <b>Analisar</b> ativo. Me diga qual resultado quer analisar.`,gaps:`Modo <b>Gaps</b> ativo. Vou identificar o que falta gerar como evidência.`,auditor:`Modo <b>Simular auditor</b> ativo. Vou fazer perguntas como o auditor faria.`};
+  addMsg('ai',msgs[t]+`<div class="chips"><span class="chip" onclick="ec(this)">Iniciar sobre ${aba}</span></div>`);
+}
+
+function addMsg(role,html){
+  const c=document.getElementById('msgs');
+  const d=document.createElement('div');
+  d.className='msg '+role;
+  d.innerHTML=`<div class="av ${role}">${role==='ai'?'AI':'RS'}</div><div class="bub">${html}</div>`;
+  c.appendChild(d);c.scrollTop=c.scrollHeight;
+}
+
+function addLoad(){
+  const c=document.getElementById('msgs');
+  const d=document.createElement('div');
+  d.className='msg ai';d.id='ld';
+  d.innerHTML=`<div class="av ai">AI</div><div class="bub"><div class="ld"><span></span><span></span><span></span></div></div>`;
+  c.appendChild(d);c.scrollTop=c.scrollHeight;
+}
+
+function rmLoad(){const e=document.getElementById('ld');if(e)e.remove();}
+
+function ec(el){envText(el.textContent);}
+function hk(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();enviar();}}
+function ar(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,100)+'px';}
+
+function enviar(){
+  const inp=document.getElementById('inp');
+  const t=inp.value.trim();
+  if(!t||loading)return;
+  inp.value='';inp.style.height='auto';
+  envText(t);
+}
+
+async function envText(t){
+  if(loading)return;
+  loading=true;
+  document.getElementById('sndBtn').disabled=true;
+  addMsg('user',esc(t));
+  addLoad();
+  hist.push({role:'user',content:t});
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:getSys(),messages:hist})
+    });
+    const data=await res.json();
+    const reply=data.content?.find(b=>b.type==='text')?.text||'Sem resposta.';
+    hist.push({role:'assistant',content:reply});
+    rmLoad();addMsg('ai',fmt(reply));
+  }catch(e){rmLoad();addMsg('ai','Erro de conexão. Tente novamente.');}
+  loading=false;document.getElementById('sndBtn').disabled=false;
+}
+
+function fmt(t){
+  return t.replace(/\*\*(.*?)\*\*/g,'<b>$1</b>').replace(/\*(.*?)\*/g,'<em>$1</em>')
+    .replace(/`(.*?)`/g,'<span class="tg">$1</span>')
+    .replace(/✅/g,'<span class="ok">✅</span>').replace(/⚠️/g,'<span class="warn">⚠️</span>').replace(/❌/g,'<span class="err">❌</span>')
+    .replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>');
+}
+
+function esc(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+render();
+addMsg('ai',`Olá, Rafael! Assistente carregado com todos os dados reais da planilha MPS.br.<br><br>
+<b>O que você pode fazer:</b><br>
+<span class="ok">Resumo</span> — visão geral do status de cada processo<br>
+<span class="ok">Analisar</span> — análise detalhada de um resultado específico<br>
+<span class="ok">Gaps</span> — identificar o que falta gerar como evidência<br>
+<span class="ok">Simular auditor</span> — preparar o time para as perguntas reais da avaliação<br><br>
+Selecione uma aba e uma tab, ou comece por aqui:
+<div class="chips">
+  <span class="chip" onclick="ec(this)">Ver gaps de todas as abas</span>
+  <span class="chip" onclick="ec(this)">Quais processos têm mais risco na avaliação?</span>
+  <span class="chip" onclick="ec(this)">Como usar esse assistente com o time?</span>
+  <span class="chip" onclick="ec(this)">Simular auditor no GPR</span>
+</div>`);
+</script>
+</body>
+</html>
